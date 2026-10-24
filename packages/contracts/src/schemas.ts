@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export const registerSchema = z.object({
   email: z.string().trim().email().max(320),
@@ -14,20 +14,20 @@ export const createVehicleSchema = z.object({
   make: z.string().trim().min(1).max(80),
   model: z.string().trim().min(1).max(100),
   category: z.string().trim().min(1).max(40),
-  price: z.number().finite().positive().max(9_999_999_999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, 'Price must have at most two decimal places'),
-  quantity: z.number().int().min(0).max(2_147_483_647),
+  price: z.number().finite().positive().max(9999999999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, "Price must have at most two decimal places"),
+  quantity: z.number().int().min(0).max(2147483647),
 });
 
 export const updateVehicleSchema = z.object({
   make: z.string().trim().min(1).max(80).optional(),
   model: z.string().trim().min(1).max(100).optional(),
   category: z.string().trim().min(1).max(40).optional(),
-  price: z.number().finite().positive().max(9_999_999_999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, 'Price must have at most two decimal places').optional(),
-  quantity: z.number().int().min(0).max(2_147_483_647).optional(),
+  price: z.number().finite().positive().max(9999999999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, "Price must have at most two decimal places").optional(),
+  quantity: z.number().int().min(0).max(2147483647).optional(),
 });
 
 export const restockSchema = z.object({
-  quantity: z.number().int().min(1).max(2_147_483_647)
+  quantity: z.number().int().min(1).max(2147483647)
 });
 
 export const vehicleIdSchema = z.object({
