@@ -4,7 +4,7 @@ import { ApiError } from "../../shared/api-error.js";
 import type { LoginInput, RegisterInput } from "@dealership/contracts";
 import type { AuthRepository } from "./auth.repository.js";
 
-export type AuthRepositoryPort = Pick<AuthRepository, "findByNormalizedEmail" | "createCustomer">;
+export type AuthRepositoryPort = Pick<AuthRepository, "findByNormalizedEmail" | "createCustomer" | "findById">;
 
 export class AuthService {
   constructor(private readonly repository: AuthRepositoryPort, private readonly secret: string) {}
@@ -32,6 +32,12 @@ export class AuthService {
     const token = await new SignJWT({ role: user.role })
       .setProtectedHeader({ alg: "HS256" }).setSubject(user.id).setIssuedAt().setExpirationTime("15m").sign(new TextEncoder().encode(this.secret));
     return { user: this.publicUser(user), token };
+  }
+
+  async session(id: string) {
+    const user = await this.repository.findById(id);
+    if (!user || !user.isActive) throw new ApiError(401, "UNAUTHENTICATED", "Session is invalid or expired.");
+    return this.publicUser(user);
   }
 
   private publicUser(user: { id: string; email: string; role: string; createdAt: Date }) {

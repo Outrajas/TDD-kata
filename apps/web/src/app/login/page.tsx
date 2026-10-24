@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
-
-export default function LoginPage() {
-  redirect("/#account");
-}
+import AuthForm from "../../components/auth/auth-form";
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ registered?: string }> }) { const params = await searchParams; return <AuthForm mode="login" registered={params.registered === "1"} />; }

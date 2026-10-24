@@ -6,6 +6,7 @@ A full-stack kata for vehicle inventory, account authentication, and stock-safe 
 
 - Backend API, database migrations, admin bootstrap, and automated tests are implemented.
 - The PostgreSQL database starts empty; add inventory through the admin flow or API.
+- The frontend provides separate home, sign-in, registration, customer inventory, and administrator inventory pages backed by the API and PostgreSQL.
 - Public repository: [github.com/Outrajas/TDD-kata](https://github.com/Outrajas/TDD-kata).
 
 ## Technology
@@ -71,6 +72,8 @@ PROMPTS.md             Raw AI conversation log captured so far
    pnpm dev
    ```
 
+   On Windows, after setup, you can instead double-click [`start-local.bat`](start-local.bat). It runs both development servers in parallel in the launcher window. PostgreSQL must already be running, migrations must have been applied, and `apps/api/.env` must exist. Keep the window open while using the app; press Ctrl+C there to stop both servers. If startup exits, the window stays open with the error output visible.
+
    The API listens at `http://localhost:3001` and the web app at `http://localhost:3000`. Check API readiness with `GET http://localhost:3001/api/health`.
 
 The API endpoint list and request/response details are in [docs/api-reference.md](docs/api-reference.md). The current database design and constraints are described in [docs/database-design.md](docs/database-design.md).
@@ -92,6 +95,17 @@ The API endpoint list and request/response details are in [docs/api-reference.md
 | `POST /api/vehicles/:id/restock` | Admin | Add stock and append an inventory movement |
 
 The API uses a `{ data: ... }` success envelope and a structured `{ error: ... }` failure envelope. Search filters combine, and price bounds are inclusive. Customers see available stock while admins can also see active zero-stock vehicles for restocking. Purchases update stock, purchase history, and the inventory ledger in one transaction; retries can use an idempotency key. See the API reference for exact schemas, status codes, and error cases.
+
+## Application functions
+
+- **Account access:** customers register with validated credentials, sign in, restore a session from the HttpOnly JWT cookie, and sign out. Admins use the same sign-in page and are routed to inventory management by their database role. Public registration always creates a customer; create the first administrator with the bootstrap command above.
+- **Customer inventory:** authenticated customers search by make, model, category, and inclusive minimum/maximum price, navigate paginated results, view price and available quantity, and purchase one unit. The API enforces authorization and availability; it records each purchase and the corresponding stock movement atomically.
+- **Administrator inventory:** administrators list active inventory including zero-stock listings, create vehicles with opening stock, edit vehicle details and quantity, restock with a ledger entry, deactivate a listing while preserving purchase history, and navigate paginated results.
+- **Administrator dashboard:** administrators can see all registered accounts and role/status/creation date, plus customer/admin/listing/stock/purchase totals. The page refreshes from the database every 10 seconds; this is not online-presence tracking.
+- **Inventory filters:** the API provides distinct current makes, models, categories, and prices for dropdown filters. Selecting values refreshes the paginated matching results.
+- **Internal demo checkout:** vehicle details lead to a test-only payment panel that displays the supplied UPI QR and demo dinner message. Scanning the QR may cause a real UPI payment; the app does not verify or process payments. The separate test-purchase action records a local purchase and decrements inventory only.
+- **Local persistence:** accounts, listings, purchase records, and inventory movements are stored in PostgreSQL. There is no browser dummy-data mode or preloaded inventory; the initial inventory is empty. An admin creates listings after migrations and administrator setup.
+- **API-backed UI:** frontend hooks send requests with `credentials: "include"`. The JWT remains in an HttpOnly cookie and is validated by API middleware on each protected request; local storage is not used as the authentication source. The browser displays validation, authorization, and request errors returned by the API.
 
 ## Data model and design
 

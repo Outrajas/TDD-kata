@@ -4,6 +4,19 @@ import { prisma } from "../../src/db.js";
 import { addVehicle, loginAsAdmin, registerAndLogin } from "../fixtures/vehicle.fixture.js";
 
 describe("vehicle endpoints", () => {
+  it("returns available dropdown values from active inventory", async () => {
+    const admin = await loginAsAdmin();
+    const vehicle = await addVehicle(admin.cookie, { make: "Dropdown Motors", model: "Choice Test", category: "Demo Category", price: 28999, quantity: 2 });
+    const response = await app.request("/api/vehicles/options", { headers: { cookie: admin.cookie } });
+    const options = (await response.json()).data;
+
+    expect(response.status).toBe(200);
+    expect(options.makes).toContain("Dropdown Motors");
+    expect(options.models).toContain("Choice Test");
+    expect(options.categories).toContain("Demo Category");
+    expect(options.prices).toContain(vehicle.price);
+  });
+
   it("requires authentication for listing and searches by combined filters", async () => {
     const unauthenticated = await app.request("/api/vehicles");
     expect(unauthenticated.status).toBe(401);
@@ -24,9 +37,11 @@ describe("vehicle endpoints", () => {
   it("shows out-of-stock active listings to admins so they can restock them", async () => {
     const admin = await loginAsAdmin();
     const customer = await registerAndLogin();
-    const vehicle = await addVehicle(admin.cookie, { quantity: 0 });
-    const adminResponse = await app.request("/api/vehicles", { headers: { cookie: admin.cookie } });
-    const customerResponse = await app.request("/api/vehicles", { headers: { cookie: customer.cookie } });
+    const make = `ZeroStock-${Date.now()}`;
+    const vehicle = await addVehicle(admin.cookie, { make, quantity: 0 });
+    const query = `?make=${encodeURIComponent(make)}&pageSize=100`;
+    const adminResponse = await app.request(`/api/vehicles${query}`, { headers: { cookie: admin.cookie } });
+    const customerResponse = await app.request(`/api/vehicles${query}`, { headers: { cookie: customer.cookie } });
     const adminItems = (await adminResponse.json()).data.items as Array<{ id: string; quantity: number }>;
     const customerItems = (await customerResponse.json()).data.items as Array<{ id: string }>;
 

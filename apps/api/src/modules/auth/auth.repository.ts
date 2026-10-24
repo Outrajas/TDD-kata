@@ -5,6 +5,9 @@ export class AuthRepository {
   findByNormalizedEmail(emailNormalized: string) {
     return this.prisma.user.findUnique({ where: { emailNormalized } });
   }
+  findById(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
   createCustomer(emailNormalized: string, passwordHash: string) {
     return this.prisma.user.create({ data: { email: emailNormalized, emailNormalized, passwordHash } });
   }

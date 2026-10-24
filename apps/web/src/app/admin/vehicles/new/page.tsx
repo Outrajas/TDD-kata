@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
-
-export default function NewVehiclePage() {
-  redirect("/#inventory");
-}
+import InventoryPage from "../../../../components/inventory/inventory-page";
+export default function NewVehiclePage() { return <InventoryPage adminOnly />; }

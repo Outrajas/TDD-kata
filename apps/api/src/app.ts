@@ -5,6 +5,7 @@ import { apiErrorHandler, notFoundHandler } from "./middleware/error-handler.js"
 import { createAuthRoutes } from "./modules/auth/auth.routes.js";
 import { createVehicleRoutes } from "./modules/vehicles/vehicle.routes.js";
 import { createInventoryRoutes } from "./modules/inventory/inventory.routes.js";
+import { createAdminRoutes } from "./modules/admin/admin.routes.js";
 
 export type AppDependencies = { prisma: PrismaClient; jwtSecret: string; allowedOrigin?: string; secureCookies?: boolean };
 export function createApp(deps: AppDependencies): Express {
@@ -15,6 +16,7 @@ export function createApp(deps: AppDependencies): Express {
   app.use(express.json({ limit: "32kb" }));
   app.get("/api/health", (_req, res) => res.json({ data: { status: "ok" } }));
   app.use("/api/auth", createAuthRoutes(deps));
+  app.use("/api/admin", createAdminRoutes(deps));
   app.use("/api/vehicles", createVehicleRoutes(deps));
   app.use("/api/vehicles", createInventoryRoutes(deps));
   app.use(notFoundHandler);

@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
-
+"use client";
+import { useParams } from "next/navigation";
+import InventoryPage from "../../../../../components/inventory/inventory-page";
 export default function EditVehiclePage() {
-  redirect("/#inventory");
+  const params = useParams<{ id: string }>();
+  return <InventoryPage adminOnly editVehicleId={params.id} />;
 }

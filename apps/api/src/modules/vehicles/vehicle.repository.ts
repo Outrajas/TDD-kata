@@ -25,6 +25,17 @@ export class VehicleRepository {
     return { items, total };
   }
 
+  async searchOptions(includeOutOfStock = false) {
+    const where: Prisma.VehicleWhereInput = { isActive: true, ...(includeOutOfStock ? {} : { quantity: { gt: 0 } }) };
+    const [makes, models, categories, prices] = await Promise.all([
+      this.prisma.vehicle.findMany({ where, distinct: ["make"], select: { make: true }, orderBy: { make: "asc" } }),
+      this.prisma.vehicle.findMany({ where, distinct: ["model"], select: { model: true }, orderBy: { model: "asc" } }),
+      this.prisma.vehicle.findMany({ where, distinct: ["category"], select: { category: true }, orderBy: { category: "asc" } }),
+      this.prisma.vehicle.findMany({ where, distinct: ["price"], select: { price: true }, orderBy: { price: "asc" } }),
+    ]);
+    return { makes: makes.map((item) => item.make), models: models.map((item) => item.model), categories: categories.map((item) => item.category), prices: prices.map((item) => item.price.toString()) };
+  }
+
   create(input: CreateVehicleInput, actorUserId: string) {
     return this.prisma.$transaction(async (tx) => {
       const vehicle = await tx.vehicle.create({ data: { ...input, price: new Prisma.Decimal(input.price) } });

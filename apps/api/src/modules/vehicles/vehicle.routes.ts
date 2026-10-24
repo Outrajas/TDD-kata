@@ -11,6 +11,9 @@ import { VehicleService } from "./vehicle.service.js";
 export function createVehicleRoutes(deps: AppDependencies) {
   const routes = Router();
   const service = new VehicleService(new VehicleRepository(deps.prisma));
+  routes.get("/options", authenticate(deps), async (req: AuthenticatedRequest, res) => {
+    res.json({ data: await service.searchOptions(req.user!.role === "ADMIN") });
+  });
   routes.get("/search", authenticate(deps), async (req: AuthenticatedRequest, res) => {
     const parsed = vehicleSearchSchema.safeParse(req.query);
     if (!parsed.success) throw new ApiError(422, "VALIDATION_ERROR", "Search filters are invalid.", parsed.error.flatten());

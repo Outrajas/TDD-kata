@@ -64,8 +64,12 @@ describe("authentication endpoints", () => {
     expect(login.status).toBe(200);
     expect(login.headers.get("set-cookie")).toMatch(/HttpOnly/i);
     expect(login.headers.get("set-cookie")).toMatch(/SameSite=Lax/i);
+    const cookie = login.headers.get("set-cookie")!.split(";")[0];
+    const session = await app.request("/api/auth/session", { headers: { cookie } });
     expect(invalid.status).toBe(401);
     expect(logout.status).toBe(204);
+    expect(session.status).toBe(200);
+    expect((await session.json()).data.user.email).toBe(email.toLowerCase());
     expect(logout.headers.get("set-cookie")).toMatch(/Expires=Thu, 01 Jan 1970/i);
     expect(testJwtSecret.length).toBeGreaterThan(31);
     expect(await prisma.user.count({ where: { emailNormalized: email } })).toBe(1);

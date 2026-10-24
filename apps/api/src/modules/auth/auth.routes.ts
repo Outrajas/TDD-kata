@@ -4,10 +4,15 @@ import type { AppDependencies } from "../../app.js";
 import { AuthService } from "./auth.service.js";
 import { AuthRepository } from "./auth.repository.js";
 import { ApiError } from "../../shared/api-error.js";
+import { authenticate } from "../../middleware/authenticate.js";
+import type { AuthenticatedRequest } from "../../middleware/authenticate.js";
 
 export function createAuthRoutes(deps: AppDependencies) {
   const routes = Router();
   const service = new AuthService(new AuthRepository(deps.prisma), deps.jwtSecret);
+  routes.get("/session", authenticate(deps), async (req: AuthenticatedRequest, res) => {
+    res.json({ data: { user: await service.session(req.user!.id) } });
+  });
   routes.post("/register", async (req, res) => {
     const parsed = registerSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(422, "VALIDATION_ERROR", "Registration data is invalid.", parsed.error.flatten());

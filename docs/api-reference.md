@@ -9,9 +9,12 @@ Base URL: `http://localhost:3001`. JSON routes use `{ "data": ... }` on success 
 | `GET /api/health` | Public | None | `200 { data: { status: "ok" } }` |
 | `POST /api/auth/register` | Public | JSON `{ email, password }`; password 10–128 chars with upper/lowercase and a digit. Registration always creates a `CUSTOMER`. | `201 { data: { user } }` |
 | `POST /api/auth/login` | Public | JSON `{ email, password }` | `200 { data: { user } }` and `Set-Cookie` JWT |
+| `GET /api/auth/session` | Authenticated | No body; validates the HttpOnly JWT cookie and returns the active user. | `200 { data: { user } }` |
+| `GET /api/admin/dashboard` | Admin | No body; returns user roster, account role counts, inventory totals, purchase count, and generation time. Password hashes are never selected. | `200 { data: { metrics, users, generatedAt } }` |
 | `POST /api/auth/logout` | Public | None; clears the session cookie on this browser. | `204` |
 | `GET /api/vehicles` | Authenticated | Query: `page` (default 1), `pageSize` (default 20; max 100), optional `make`, `model`, `category`, `minPrice`, `maxPrice`. Customers see active in-stock vehicles; admins also see active zero-stock vehicles so they can restock them. | `200 { data: { items, pagination } }` |
 | `GET /api/vehicles/search` | Authenticated | Same query filters as listing. Filters combine with AND; make/model use case-insensitive partial matching, category uses case-insensitive equality, and price bounds are inclusive. Admins can search active zero-stock vehicles too. | `200 { data: { items, pagination } }` |
+| `GET /api/vehicles/options` | Authenticated | No body; returns distinct makes, models, categories, and prices from active inventory available to the caller's role. | `200 { data: { makes, models, categories, prices } }` |
 | `POST /api/vehicles` | Admin | JSON `{ make, model, category, price, quantity }`; price must be positive with at most 2 decimal places, quantity a nonnegative integer. Positive opening stock is recorded in the ledger. | `201 { data: vehicle }` |
 | `PUT /api/vehicles/:id` | Admin | `id` is a UUID; JSON contains the full vehicle shape `{ make, model, category, price, quantity }`. A quantity change appends an `ADJUSTMENT` ledger entry. | `200 { data: vehicle }` |
 | `DELETE /api/vehicles/:id` | Admin | `id` is a UUID. Soft-deactivates the listing so purchase history stays valid. | `204` |

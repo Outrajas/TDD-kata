@@ -3,7 +3,7 @@ import { ApiError } from "../../shared/api-error.js";
 import { pagination } from "../../shared/pagination.js";
 import { VehicleRepository } from "./vehicle.repository.js";
 
-export type VehicleRepositoryPort = Pick<VehicleRepository, "list" | "create" | "update" | "deactivate">;
+export type VehicleRepositoryPort = Pick<VehicleRepository, "list" | "searchOptions" | "create" | "update" | "deactivate">;
 
 export class VehicleService {
   constructor(private readonly repository: VehicleRepositoryPort) {}
@@ -11,6 +11,7 @@ export class VehicleService {
     const result = await this.repository.list(filters, includeOutOfStock);
     return { items: result.items.map(serializeVehicle), pagination: pagination(filters.page, filters.pageSize, result.total) };
   }
+  searchOptions(includeOutOfStock = false) { return this.repository.searchOptions(includeOutOfStock); }
   async create(input: CreateVehicleInput, actorUserId: string) { return serializeVehicle(await this.repository.create(input, actorUserId)); }
   async update(id: string, input: CreateVehicleInput, actorUserId: string) {
     const vehicle = await this.repository.update(id, input, actorUserId);
