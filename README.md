@@ -45,3 +45,10 @@ Executed via `pnpm test`:
 ## My AI Usage
 - **OpenAI Codex:** Used for scaffolding the monorepo, generating Red-Green-Refactor tests, implementing Express/Prisma repositories, and building the React 19 UI.
 - **Google Gemini:** Used for end-to-end repository auditing, fixing Git safe-directory ownership, resolving auth integration test assertions, configuring Vercel serverless deployments, and polishing documentation.
+## Live Admin Access
+To test the administrator features (Add/Update/Delete/Restock), use the following credentials:
+- **Admin Login URL:** https://tdd-kata.vercel.app/admin/login
+- **Email:** dmin@dealership.com
+- **Password:** AdminPassword123
+
+*Note: This account is pre-seeded on the live production database via the db:seed:admin script.*
