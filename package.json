@@ -1,0 +1,16 @@
+{
+  "name": "dealership-inventory-kata",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @dealership/api --filter @dealership/web dev",
+    "build": "pnpm --recursive build",
+    "lint": "pnpm --recursive lint",
+    "typecheck": "pnpm --recursive typecheck",
+    "test": "pnpm --recursive test",
+    "db:generate": "pnpm --filter @dealership/api db:generate",
+    "db:migrate": "pnpm --filter @dealership/api db:migrate",
+    "db:seed:admin": "pnpm --filter @dealership/api db:seed:admin"
+  }
+}

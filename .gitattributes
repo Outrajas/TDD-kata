@@ -1,0 +1,2 @@
+# Keep whitespace exactly as captured in the required raw AI transcript.
+PROMPTS.md whitespace=-blank-at-eol,-blank-at-eof
