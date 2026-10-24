@@ -1,3 +1,5 @@
+"use client";
+
 const carImages: Record<string, string> = {
   Sedan: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&q=80',
   SUV: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&q=80',
@@ -6,8 +8,6 @@ const carImages: Record<string, string> = {
   Truck: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=600&q=80',
   Default: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80'
 };
-
-"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
