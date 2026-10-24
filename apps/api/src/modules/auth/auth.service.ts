@@ -23,10 +23,10 @@ export class AuthService {
     }
   }
 
-  async login(input: LoginInput, requiredRole: "CUSTOMER" | "ADMIN" = "CUSTOMER") {
+  async login(input: LoginInput, requiredRole?: "CUSTOMER" | "ADMIN") {
     const emailNormalized = input.email.trim().toLowerCase();
     const user = await this.repository.findByNormalizedEmail(emailNormalized);
-    if (!user || !user.isActive || user.role !== requiredRole || !(await compare(input.password, user.passwordHash))) {
+    if (!user || !user.isActive || (requiredRole && user.role !== requiredRole) || !(await compare(input.password, user.passwordHash))) {
       throw new ApiError(401, "INVALID_CREDENTIALS", "Email or password is incorrect.");
     }
     const token = await new SignJWT({ role: user.role })

@@ -8,7 +8,7 @@ describe("authentication endpoints", () => {
   it("exposes a public API health check", async () => {
     const response = await app.request("/api/health");
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ data: { status: "ok" } });
+    expect(await response.json()).toEqual({ data: { status: "ok", database: "connected" } });
   });
 
   it("registers a normalized customer and never returns the password hash", async () => {
