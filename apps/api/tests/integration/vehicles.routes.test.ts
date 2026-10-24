@@ -21,6 +21,19 @@ describe("vehicle endpoints", () => {
     expect(body.data.items.some((item: { id: string }) => item.id === vehicle.id)).toBe(true);
   });
 
+  it("shows out-of-stock active listings to admins so they can restock them", async () => {
+    const admin = await loginAsAdmin();
+    const customer = await registerAndLogin();
+    const vehicle = await addVehicle(admin.cookie, { quantity: 0 });
+    const adminResponse = await app.request("/api/vehicles", { headers: { cookie: admin.cookie } });
+    const customerResponse = await app.request("/api/vehicles", { headers: { cookie: customer.cookie } });
+    const adminItems = (await adminResponse.json()).data.items as Array<{ id: string; quantity: number }>;
+    const customerItems = (await customerResponse.json()).data.items as Array<{ id: string }>;
+
+    expect(adminItems).toContainEqual(expect.objectContaining({ id: vehicle.id, quantity: 0 }));
+    expect(customerItems.some((item) => item.id === vehicle.id)).toBe(false);
+  });
+
   it("creates and updates inventory for admins, rejects customers, and soft-deletes", async () => {
     const admin = await loginAsAdmin();
     const customer = await registerAndLogin();
