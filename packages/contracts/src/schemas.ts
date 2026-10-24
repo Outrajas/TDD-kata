@@ -19,7 +19,7 @@ const vehicleFields = {
 export const createVehicleSchema = z.object(vehicleFields).strict();
 export const updateVehicleSchema = z.object(vehicleFields).strict();
 export const restockSchema = z.object({ quantity: z.number().int().min(1).max(2_147_483_647), note: z.string().trim().max(500).optional() }).strict();
-export const vehicleIdSchema = z.uuid();
+export const vehicleIdSchema = z.string().uuid();
 export const vehicleSearchSchema = z.object({
   make: z.string().trim().min(1).max(80).optional(),
   model: z.string().trim().min(1).max(100).optional(),
