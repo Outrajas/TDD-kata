@@ -10,7 +10,7 @@ export type DashboardData = {
   generatedAt: string;
 };
 type Envelope<T> = { data: T };
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API}/api${path}`, { ...init, credentials: "include", headers: { "Content-Type": "application/json", ...init.headers } });

@@ -18,13 +18,15 @@ export function createAuthRoutes(deps: AppDependencies) {
     if (!parsed.success) throw new ApiError(422, "VALIDATION_ERROR", "Registration data is invalid.", parsed.error.flatten());
     res.status(201).json({ data: { user: await service.register(parsed.data) } });
   });
-  routes.post("/login", async (req, res) => {
+  const login = (role: "CUSTOMER" | "ADMIN") => async (req: import("express").Request, res: import("express").Response) => {
     const parsed = loginSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(422, "VALIDATION_ERROR", "Login data is invalid.", parsed.error.flatten());
-    const result = await service.login(parsed.data);
+    const result = await service.login(parsed.data, role);
     res.cookie("dealership_token", result.token, { httpOnly: true, sameSite: "lax", secure: deps.secureCookies ?? process.env.NODE_ENV === "production", path: "/", maxAge: 900_000 });
     res.json({ data: { user: result.user } });
-  });
+  };
+  routes.post("/login", login("CUSTOMER"));
+  routes.post("/admin-login", login("ADMIN"));
   routes.post("/logout", (_req, res) => {
     res.clearCookie("dealership_token", { httpOnly: true, sameSite: "lax", secure: deps.secureCookies ?? process.env.NODE_ENV === "production", path: "/" });
     res.status(204).end();

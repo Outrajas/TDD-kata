@@ -14,7 +14,14 @@ export function createApp(deps: AppDependencies): Express {
   app.disable("x-powered-by");
   app.use(createCorsMiddleware(deps.allowedOrigin ?? "http://localhost:3000"));
   app.use(express.json({ limit: "32kb" }));
-  app.get("/api/health", (_req, res) => res.json({ data: { status: "ok" } }));
+  app.get("/api/health", async (_req, res) => {
+    try {
+      await deps.prisma.$queryRaw`SELECT 1`;
+      res.json({ data: { status: "ok", database: "connected" } });
+    } catch {
+      res.status(503).json({ error: { code: "DATABASE_UNAVAILABLE", message: "The API is running but PostgreSQL is unavailable." } });
+    }
+  });
   app.use("/api/auth", createAuthRoutes(deps));
   app.use("/api/admin", createAdminRoutes(deps));
   app.use("/api/vehicles", createVehicleRoutes(deps));

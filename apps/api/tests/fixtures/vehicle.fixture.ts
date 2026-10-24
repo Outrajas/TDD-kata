@@ -34,7 +34,7 @@ export async function loginAsAdmin() {
     where: { emailNormalized: credentials.email.toLowerCase() },
     data: { role: "ADMIN" },
   });
-  const login = await app.request("/api/auth/login", {
+  const login = await app.request("/api/auth/admin-login", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ email: credentials.email, password: credentials.password }),

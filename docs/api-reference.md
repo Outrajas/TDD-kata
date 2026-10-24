@@ -6,9 +6,10 @@ Base URL: `http://localhost:3001`. JSON routes use `{ "data": ... }` on success 
 
 | Method and path | Access | Parameters and body | Success |
 |---|---|---|---|
-| `GET /api/health` | Public | None | `200 { data: { status: "ok" } }` |
+| `GET /api/health` | Public | None; runs `SELECT 1` against PostgreSQL, returning 503 if the database is unreachable. | `200 { data: { status: "ok", database: "connected" } }` |
 | `POST /api/auth/register` | Public | JSON `{ email, password }`; password 10–128 chars with upper/lowercase and a digit. Registration always creates a `CUSTOMER`. | `201 { data: { user } }` |
-| `POST /api/auth/login` | Public | JSON `{ email, password }` | `200 { data: { user } }` and `Set-Cookie` JWT |
+| `POST /api/auth/login` | Public customer login | JSON `{ email, password }`; accepts only active `CUSTOMER` accounts. | `200 { data: { user } }` and `Set-Cookie` JWT |
+| `POST /api/auth/admin-login` | Public admin login | JSON `{ email, password }`; email is the administrator ID, accepts only active `ADMIN` accounts provisioned by the seed-admin script. | `200 { data: { user } }` and `Set-Cookie` JWT |
 | `GET /api/auth/session` | Authenticated | No body; validates the HttpOnly JWT cookie and returns the active user. | `200 { data: { user } }` |
 | `GET /api/admin/dashboard` | Admin | No body; returns user roster, account role counts, inventory totals, purchase count, and generation time. Password hashes are never selected. | `200 { data: { metrics, users, generatedAt } }` |
 | `POST /api/auth/logout` | Public | None; clears the session cookie on this browser. | `204` |

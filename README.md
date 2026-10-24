@@ -76,7 +76,7 @@ PROMPTS.md             Raw AI conversation log captured so far
 
    The API listens at `http://localhost:3001` and the web app at `http://localhost:3000`. Check API readiness with `GET http://localhost:3001/api/health`.
 
-The API endpoint list and request/response details are in [docs/api-reference.md](docs/api-reference.md). The current database design and constraints are described in [docs/database-design.md](docs/database-design.md).
+The API endpoint list and request/response details are in [docs/api-reference.md](docs/api-reference.md). The current database design and constraints are described in [docs/database-design.md](docs/database-design.md). Concrete issues encountered and their resolutions are in [docs/issues-and-resolutions.md](docs/issues-and-resolutions.md).
 
 ## API overview
 
@@ -85,6 +85,7 @@ The API endpoint list and request/response details are in [docs/api-reference.md
 | `GET /api/health` | Public | Health check |
 | `POST /api/auth/register` | Public | Register a customer |
 | `POST /api/auth/login` | Public | Sign in and set the JWT cookie |
+| `POST /api/auth/admin-login` | Public | Admin ID (email) sign-in; accepts only provisioned admin accounts |
 | `POST /api/auth/logout` | Public | Clear the browser cookie |
 | `GET /api/vehicles` | Authenticated | List inventory with pagination and optional filters (admins can also see zero-stock vehicles to restock) |
 | `GET /api/vehicles/search` | Authenticated | Search by make, model, category, and price range |
@@ -94,11 +95,11 @@ The API endpoint list and request/response details are in [docs/api-reference.md
 | `POST /api/vehicles/:id/purchase` | Authenticated | Atomically purchase one unit; optional `Idempotency-Key` header |
 | `POST /api/vehicles/:id/restock` | Admin | Add stock and append an inventory movement |
 
-The API uses a `{ data: ... }` success envelope and a structured `{ error: ... }` failure envelope. Search filters combine, and price bounds are inclusive. Customers see available stock while admins can also see active zero-stock vehicles for restocking. Purchases update stock, purchase history, and the inventory ledger in one transaction; retries can use an idempotency key. See the API reference for exact schemas, status codes, and error cases.
+The API uses a `{ data: ... }` success envelope and a structured `{ error: ... }` failure envelope. `GET /api/health` runs a PostgreSQL readiness query and returns `database: "connected"` or HTTP 503. Search filters combine, and price bounds are inclusive. Customers see available stock while admins can also see active zero-stock vehicles for restocking. Purchases update stock, purchase history, and the inventory ledger in one transaction; retries can use an idempotency key. See the API reference for exact schemas, status codes, and error cases.
 
 ## Application functions
 
-- **Account access:** customers register with validated credentials, sign in, restore a session from the HttpOnly JWT cookie, and sign out. Admins use the same sign-in page and are routed to inventory management by their database role. Public registration always creates a customer; create the first administrator with the bootstrap command above.
+- **Account access:** customers register with validated credentials, use customer sign-in, restore a session from the HttpOnly JWT cookie, and sign out. Administrators use a separate admin sign-in page and role-restricted API endpoint. Public registration always creates a customer; create the first administrator with the bootstrap command above. Password fields have a view toggle and registration displays live password requirements.
 - **Customer inventory:** authenticated customers search by make, model, category, and inclusive minimum/maximum price, navigate paginated results, view price and available quantity, and purchase one unit. The API enforces authorization and availability; it records each purchase and the corresponding stock movement atomically.
 - **Administrator inventory:** administrators list active inventory including zero-stock listings, create vehicles with opening stock, edit vehicle details and quantity, restock with a ledger entry, deactivate a listing while preserving purchase history, and navigate paginated results.
 - **Administrator dashboard:** administrators can see all registered accounts and role/status/creation date, plus customer/admin/listing/stock/purchase totals. The page refreshes from the database every 10 seconds; this is not online-presence tracking.
@@ -106,6 +107,11 @@ The API uses a `{ data: ... }` success envelope and a structured `{ error: ... }
 - **Internal demo checkout:** vehicle details lead to a test-only payment panel that displays the supplied UPI QR and demo dinner message. Scanning the QR may cause a real UPI payment; the app does not verify or process payments. The separate test-purchase action records a local purchase and decrements inventory only.
 - **Local persistence:** accounts, listings, purchase records, and inventory movements are stored in PostgreSQL. There is no browser dummy-data mode or preloaded inventory; the initial inventory is empty. An admin creates listings after migrations and administrator setup.
 - **API-backed UI:** frontend hooks send requests with `credentials: "include"`. The JWT remains in an HttpOnly cookie and is validated by API middleware on each protected request; local storage is not used as the authentication source. The browser displays validation, authorization, and request errors returned by the API.
+- **Database readiness:** the site header polls `GET /api/health` and displays whether the API can query PostgreSQL. This confirms the API's live database connection; it is not a browser-local database or dummy-data mode.
+
+## Vercel deployment
+
+Deploy two Vercel projects from this monorepo: set the frontend project's Root Directory to `apps/web`, and the API project's Root Directory to `apps/api`. Set `API_PROXY_ORIGIN` in the web project to the public API origin so `/api/*` calls are proxied through Next.js and the JWT cookie remains same-origin to the browser. Set `DATABASE_URL`, a random `JWT_SECRET` (at least 32 characters), `WEB_ORIGIN`, and `NODE_ENV=production` in the API project. Use hosted PostgreSQL and apply the checked-in Prisma migrations before launch; provision an administrator with the documented seed command. See [docs/issues-and-resolutions.md](docs/issues-and-resolutions.md) for deployment notes.
 
 ## Data model and design
 

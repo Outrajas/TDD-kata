@@ -11,7 +11,7 @@ export function useSession() {
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
-  const login = async (email: string, password: string) => { const result = await api<{ user: User }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }); setUser(result.user); return result.user; };
+  const login = async (email: string, password: string, admin = false) => { const result = await api<{ user: User }>(admin ? "/auth/admin-login" : "/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }); setUser(result.user); return result.user; };
   const register = (email: string, password: string) => api<{ user: User }>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) });
   const logout = async () => { await api<void>("/auth/logout", { method: "POST" }); setUser(null); };
   return { user, loading, login, register, logout, refresh };
