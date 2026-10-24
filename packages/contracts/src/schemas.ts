@@ -31,7 +31,7 @@ export const restockSchema = z.object({
 });
 
 export const vehicleIdSchema = z.object({
-  id: z.string().regex(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/, "Invalid UUID")
+  id: z.string().uuid()
 });
 
 export const searchQuerySchema = z.object({
