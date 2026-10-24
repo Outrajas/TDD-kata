@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
 const environmentSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -10,6 +10,8 @@ const environmentSchema = z.object({
 
 export function loadEnvironment(source: NodeJS.ProcessEnv = process.env) {
   const parsed = environmentSchema.safeParse(source);
-  if (!parsed.success) throw new Error(`Invalid API environment: ${parsed.error.message}`);
+  if (!parsed.success) {
+    throw new Error(`Invalid API environment: ${parsed.error.message}`);
+  }
   return parsed.data;
 }
