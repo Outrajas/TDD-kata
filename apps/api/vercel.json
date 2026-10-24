@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm --filter @dealership/contracts build && pnpm --filter @dealership/api build",
+  "buildCommand": "pnpm build",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api" }
   ]
