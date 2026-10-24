@@ -14,7 +14,7 @@ export const createVehicleSchema = z.object({
   make: z.string().trim().min(1).max(80),
   model: z.string().trim().min(1).max(100),
   category: z.string().trim().min(1).max(40),
-  price: z.number().finite().positive().max(9999999999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, "Price must have at most two decimal places"),
+  price: z.number().finite().positive().max(9999999999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, { message: "Price must have at most two decimal places" }),
   quantity: z.number().int().min(0).max(2147483647),
 });
 
@@ -22,19 +22,19 @@ export const updateVehicleSchema = z.object({
   make: z.string().trim().min(1).max(80).optional(),
   model: z.string().trim().min(1).max(100).optional(),
   category: z.string().trim().min(1).max(40).optional(),
-  price: z.number().finite().positive().max(9999999999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, "Price must have at most two decimal places").optional(),
+  price: z.number().finite().positive().max(9999999999).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-7, { message: "Price must have at most two decimal places" }).optional(),
   quantity: z.number().int().min(0).max(2147483647).optional(),
 });
 
 export const restockSchema = z.object({
-  quantity: z.number().int().min(1).max(2147483647)
+  quantity: z.number().int().min(1).max(2147483647),
 });
 
 export const vehicleIdSchema = z.object({
-  id: z.string().uuid()
+  id: z.string().uuid(),
 });
 
-export const searchQuerySchema = z.object({
+export const vehicleSearchSchema = z.object({
   make: z.string().trim().optional(),
   model: z.string().trim().optional(),
   category: z.string().trim().optional(),
@@ -48,3 +48,10 @@ export const searchQuerySchema = z.object({
   }
   return true;
 }, { message: "minPrice must be less than or equal to maxPrice", path: ["minPrice"] });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type CreateVehicleInput = z.infer<typeof createVehicleSchema>;
+export type UpdateVehicleInput = z.infer<typeof updateVehicleSchema>;
+export type RestockInput = z.infer<typeof restockSchema>;
+export type VehicleSearch = z.infer<typeof vehicleSearchSchema>;
