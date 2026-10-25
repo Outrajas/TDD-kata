@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
 export const registerSchema = z.object({
   email: z.string().trim().email().max(320),
@@ -28,6 +28,7 @@ export const updateVehicleSchema = z.object({
 
 export const restockSchema = z.object({
   quantity: z.number().int().min(1).max(2147483647),
+  note: z.string().optional(),
 });
 
 export const vehicleIdSchema = z.object({
